@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Issue Tracker</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: 0.3s ease-in-out;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+
+  .issue-card {
+    background: #fff;
+    padding: 15px;
+    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+  }
+
+  .issue-card:hover {
+    transform: scale(1.02);
+  }
+
+  .status {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .pending { background-color: #ffcc00; color: #333; }
+  .in-progress { background-color: #007bff; color: white; }
+  .resolved { background-color: #28a745; color: white; }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    right: -350px;
+    width: 300px;
+    height: 100%;
+    background: white;
+    box-shadow: -4px 0px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    transition: right 0.4s ease-in-out;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar.show {
+    right: 0;
+  }
+
+  .close-btn {
+    background: #dc3545;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: flex-end;
+  }
+
+  .save-btn {
+    background: #28a745;
+    margin-top: 10px;
+  }
+
+  .delete-btn {
+    background: #c82333;
+    margin-top: 5px;
+  }
+
+  .loading {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #666;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🔧 Issue Tracker</h1>
+  <input type="text" id="description" placeholder="Issue description">
+  <select id="status">
+    <option value="pending">🟡 Pending</option>
+    <option value="in progress">🔄 In Progress</option>
+    <option value="closed">✅ Resolved</option>
+  </select>
+  <button onclick="addIssue()">➕ Add Issue</button>
+  <div class="loading" id="loading">⏳ Loading issues...</div>
+  <div id="issue-list"></div>
+</div>
+
+<!-- Sidebar for editing -->
+<div class="sidebar" id="sidebar">
+  <button class="close-btn" onclick="closeSidebar()">✖ Close</button>
+  <h2>Edit Issue</h2>
+  <input type="text" id="edit-description">
+  <select id="edit-status">
+    <option value="pending">🟡 Pending</option>
+    <option value="in progress">🔄 In Progress</option>
+    <option value="closed">✅ Resolved</option>
+  </select>
+  <button class="save-btn" onclick="saveChanges()">💾 Save Changes</button>
+  <button class="delete-btn" onclick="deleteIssue()">❌ Delete Issue</button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBNAeLlnS2RoUHcmIALf4B5GviuZ-moOl0",
+    authDomain: "msdata-service.firebaseapp.com",
+    projectId: "msdata-service",
+    storageBucket: "msdata-service.appspot.com",
+    messagingSenderId: "721052867041",
+    appId: "1:721052867041:web:bb9a81b7ace02204945aa0",
+    measurementId: "G-5M7ZFHXT0M"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const issuesCollection = collection(db, "issues");
+  let selectedIssueId = null;
+
+  async function addIssue() {
+    const description = document.getElementById("description").value.trim();
+    if (!description) {
+      alert("⚠ Please enter an issue description.");
+      return;
+    }
+    const status = document.getElementById("status").value;
+    const date = new Date().toLocaleString();
+
+    await addDoc(issuesCollection, { description, status, date, completionTime: "" });
+    document.getElementById("description").value = "";
+    loadIssues();
+  }
+
+  async function loadIssues() {
+    const issueList = document.getElementById("issue-list");
+    issueList.innerHTML = "";
+    document.getElementById("loading").style.display = "block";
+
+    const querySnapshot = await getDocs(issuesCollection);
+    querySnapshot.forEach((issueDoc) => {
+      const issue = issueDoc.data();
+      const card = document.createElement("div");
+      card.classList.add("issue-card");
+
+      card.innerHTML = `<div>
+                          <h3>${issue.description}</h3>
+                          <p>📅 ${issue.date}</p>
+                        </div>
+                        <div class="status ${issue.status.replace(' ', '-')}">${issue.status}</div>`;
+
+      card.onclick = () => openSidebar(issueDoc.id, issue);
+      issueList.appendChild(card);
+    });
+
+    document.getElementById("loading").style.display = "none";
+  }
+
+  function openSidebar(id, issue) {
+    document.getElementById("sidebar").classList.add("show");
+    document.getElementById("edit-description").value = issue.description;
+    document.getElementById("edit-status").value = issue.status;
+    selectedIssueId = id;
+  }
+
+  function closeSidebar() {
+    document.getElementById("sidebar").classList.remove("show");
+  }
+
+  async function saveChanges() {
+    if (!selectedIssueId) return;
+    const newDesc = document.getElementById("edit-description").value;
+    const newStatus = document.getElementById("edit-status").value;
+
+    await updateDoc(doc(db, "issues", selectedIssueId), { description: newDesc, status: newStatus });
+    closeSidebar();
+    loadIssues();
+  }
+
+  async function deleteIssue() {
+    if (!selectedIssueId) return;
+    await deleteDoc(doc(db, "issues", selectedIssueId));
+    closeSidebar();
+    loadIssues();
+  }
+
+  document.addEventListener("DOMContentLoaded", loadIssues);
+
+  window.addIssue = addIssue;
+  window.closeSidebar = closeSidebar;
+  window.saveChanges = saveChanges;
+  window.deleteIssue = deleteIssue;
+</script>
+
+</body>
+</html>
