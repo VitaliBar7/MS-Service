@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="main.css">
   <title>Issue Tracker</title>
 </head>
 <body>
 
 <div class="container">
-  <h1>🔧 Issue Tracker</h1>
+  <h1>Issue Tracker</h1>
+  <button style="background-color: rgb(33, 145, 33);" id="export-btn" onclick="exportToCSV()">Export to Excel</button>
   
   <!-- שדות קלט לטיקט חדש -->
   <input type="text" id="description" placeholder="Issue description">
@@ -19,70 +21,76 @@
     <option value="closed">✅ Resolved</option>
   </select>
   
-  <!-- Employees Checkboxes -->
-  <div id="employees-container" class="checkboxes-container">
+  <!-- Dropdown Employees -->
+  <div class="dropdown" id="employee-dropdown">
     <strong>Employees:</strong>
-    <label>
-      <input type="checkbox" name="employee" value="Pasha"> Pasha
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="employee" value="Leonid"> Leonid
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
+    <button class="dropdown-btn" onclick="toggleDropdown('employee-dropdown-list')">Select Employees</button>
+    <div class="dropdown-list" id="employee-dropdown-list">
+      <label>
+        <input type="checkbox" value="Pasha" name="employee"> Pasha
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Leonid" name="employee"> Leonid
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+    </div>
   </div>
   <div>
     <input type="text" id="new-employee" placeholder="New employee name" />
-    <button onclick="addEmployee()">Add Employee</button>
+    <button onclick="addEmployee()">Add Employee <i class="fa-solid fa-user-plus"></i></button>
   </div>
   
-  <!-- Systems Checkboxes -->
-  <div id="systems-container" class="checkboxes-container">
+  <!-- Dropdown Systems -->
+  <div class="dropdown" id="system-dropdown">
     <strong>Systems:</strong>
-    <label>
-      <input type="checkbox" name="system" value="AGV"> AGV
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Mohoblocks"> Mohoblocks
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Lifts"> Lifts
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Shuttles"> Shuttles
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Washing machine"> Washing machine
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Conveyors"> Conveyors
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Sequence"> Sequence
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
-    <label>
-      <input type="checkbox" name="system" value="Sequence lifts"> Sequence lifts
-      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
-    </label>
+    <button class="dropdown-btn" onclick="toggleDropdown('system-dropdown-list')">Select Systems</button>
+    <div class="dropdown-list" id="system-dropdown-list">
+      <label>
+        <input type="checkbox" value="AGV" name="system"> AGV
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Mohoblocks" name="system"> Mohoblocks
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Lifts" name="system"> Lifts
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Shuttles" name="system"> Shuttles
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Washing machine" name="system"> Washing machine
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Conveyors" name="system"> Conveyors
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Sequence" name="system"> Sequence
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+      <label>
+        <input type="checkbox" value="Sequence lifts" name="system"> Sequence lifts
+        <button type="button" class="delete-item" onclick="deleteItem(this)"><i class="fa-solid fa-xmark"></i></button>
+      </label>
+    </div>
   </div>
   <div>
     <input type="text" id="new-system" placeholder="New system name" />
-    <button onclick="addSystem()">Add System</button>
+    <button onclick="addSystem()">Add System <i class="fa-solid fa-plus"></i></button>
   </div>
   
-  <button onclick="addIssue()">➕ Add Issue</button>
+  <button style="background-color: rgb(163, 42, 163);" onclick="addIssue()">Add Issue <i class="fa-solid fa-plus"></i></button>
   
   <!-- שדה חיפוש -->
   <input type="text" id="search" placeholder="Search issues..." />
   
-  <button onclick="toggleNotes()">📝 Open Notes</button>
+  <button style="background-color: rgb(197, 140, 34);" onclick="toggleNotes()">Open Notes <i class="fa-solid fa-file-circle-plus"></i></button>
   
   <div class="loading" id="loading">⏳ Loading issues...</div>
   <div id="issue-list"></div>
@@ -98,7 +106,7 @@
     <option value="in progress">🔄 In Progress</option>
     <option value="closed">✅ Resolved</option>
   </select>
-  <!-- אפשר להרחיב כאן לעריכת עובדים/מערכות במידת הצורך -->
+  <!-- ניתן להוסיף כאן גם עריכה לדראפדאון (עובדים/מערכות) במידת הצורך -->
   <button class="save-btn" onclick="saveChanges()">💾 Save Changes</button>
   <button class="delete-btn" onclick="deleteIssue()">❌ Delete Issue</button>
   
@@ -157,6 +165,43 @@
     setTimeout(() => { toast.style.opacity = "0"; }, 3000);
   }
 
+  // פונקציה להחלפת תצוגת ה-dropdown (פתיחה/סגירה)
+  function toggleDropdown(id) {
+    const list = document.getElementById(id);
+    list.classList.toggle("show");
+  }
+
+  // ייצוא טיקטים ל-CSV (Excel)
+  function exportToCSV() {
+    let csv = "Description,Status,Employees,Systems,Date,CompletionTime\n";
+    function escapeCSV(text) {
+      if (!text) return "";
+      text = text.toString();
+      if (text.search(/("|,|\n)/g) >= 0) {
+        text = '"' + text.replace(/"/g, '""') + '"';
+      }
+      return text;
+    }
+    allIssuesArray.forEach(issue => {
+      const desc = escapeCSV(issue.description);
+      const status = escapeCSV(issue.status);
+      const employees = escapeCSV((issue.employees || []).join("; "));
+      const systems = escapeCSV((issue.systems || []).join("; "));
+      const date = escapeCSV(new Date(issue.date).toLocaleString());
+      const completion = escapeCSV(issue.completionTime ? new Date(issue.completionTime).toLocaleString() : "");
+      csv += `${desc},${status},${employees},${systems},${date},${completion}\n`;
+    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "issues_export.csv";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
   // הוספת טיקט חדש
   async function addIssue() {
     const description = document.getElementById("description").value.trim();
@@ -166,11 +211,17 @@
     }
     const status = document.getElementById("status").value;
     
-    const employeesChecked = document.querySelectorAll('input[name="employee"]:checked');
-    const employees = Array.from(employeesChecked).map(cb => cb.value);
+    // קריאת העובדים מה-dropdown (השתמשנו ב-querySelectorAll עבור checkboxes)
+    const employeeCheckboxes = document.querySelectorAll("#employee-dropdown-list input[name='employee']");
+    const employees = Array.from(employeeCheckboxes)
+                           .filter(cb => cb.checked)
+                           .map(cb => cb.value);
     
-    const systemsChecked = document.querySelectorAll('input[name="system"]:checked');
-    const systems = Array.from(systemsChecked).map(cb => cb.value);
+    // קריאת המערכות מה-dropdown
+    const systemCheckboxes = document.querySelectorAll("#system-dropdown-list input[name='system']");
+    const systems = Array.from(systemCheckboxes)
+                         .filter(cb => cb.checked)
+                         .map(cb => cb.value);
 
     const date = new Date().toISOString();
     let completionTime = "";
@@ -188,8 +239,10 @@
     });
 
     document.getElementById("description").value = "";
-    employeesChecked.forEach(cb => cb.checked = false);
-    systemsChecked.forEach(cb => cb.checked = false);
+    // איפוס הבחירה - הסרת סימונים
+    employeeCheckboxes.forEach(cb => cb.checked = false);
+    systemCheckboxes.forEach(cb => cb.checked = false);
+    
     loadIssues(true);
   }
 
@@ -248,11 +301,11 @@
 
       let statusHTML = "";
       if (issue.status === "in progress") {
-        statusHTML = `<div class="status in-progress">🔄 In Progress <div class="loader"></div></div>`;
+        statusHTML = `<div class="status in-progress">In Progress <i class="fa-solid fa-spinner fa-spin-pulse"></i></div>`;
       } else if (issue.status === "pending") {
-        statusHTML = `<div class="status pending">Pending</div>`;
+        statusHTML = `<div class="status pending">Pending <i class="fa-solid fa-spinner fa-spin-pulse"></i></div>`;
       } else if (issue.status === "closed") {
-        statusHTML = `<div class="status resolved">✅ Resolved<br><small>${issue.completionTime || ""}</small></div>`;
+        statusHTML = `<div class="status resolved">Resolved <i class="fa-solid fa-circle-check fa-beat-fade"></i><br><small>${issue.completionTime || ""}</small></div>`;
       }
 
       card.innerHTML = `
@@ -276,7 +329,6 @@
     document.getElementById("sidebar").classList.add("show");
     document.getElementById("edit-description").value = issue.description;
     document.getElementById("edit-status").value = issue.status;
-    // לטיפול בעובדים/מערכות בעריכה – ניתן להוסיף קוד במידת הצורך
     selectedIssueId = id;
     loadTicketNotes();
   }
@@ -427,15 +479,14 @@
       alert("Please enter a new employee name.");
       return;
     }
-    const container = document.getElementById("employees-container");
-    const existing = container.querySelector(`input[value="${newName}"]`);
-    if (existing) {
+    const employeeDropdownList = document.getElementById("employee-dropdown-list");
+    if (employeeDropdownList.querySelector(`input[value="${newName}"]`)) {
       alert("Employee already exists.");
       return;
     }
     const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" name="employee" value="${newName}"> ${newName} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
-    container.appendChild(label);
+    label.innerHTML = `<input type="checkbox" value="${newName}" name="employee"> ${newName} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
+    employeeDropdownList.appendChild(label);
     document.getElementById("new-employee").value = "";
   }
 
@@ -446,15 +497,14 @@
       alert("Please enter a new system name.");
       return;
     }
-    const container = document.getElementById("systems-container");
-    const existing = container.querySelector(`input[value="${newSystem}"]`);
-    if (existing) {
+    const systemDropdownList = document.getElementById("system-dropdown-list");
+    if (systemDropdownList.querySelector(`input[value="${newSystem}"]`)) {
       alert("System already exists.");
       return;
     }
     const label = document.createElement("label");
-    label.innerHTML = `<input type="checkbox" name="system" value="${newSystem}"> ${newSystem} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
-    container.appendChild(label);
+    label.innerHTML = `<input type="checkbox" value="${newSystem}" name="system"> ${newSystem} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
+    systemDropdownList.appendChild(label);
     document.getElementById("new-system").value = "";
   }
 
@@ -469,7 +519,7 @@
     loadNotes();
   });
 
-  // מאזין לחיפוש – מסנן את allIssuesArray
+  // מאזין לחיפוש
   document.getElementById("search").addEventListener("input", function() {
     const searchTerm = this.value.toLowerCase();
     const filtered = allIssuesArray.filter(issue => {
@@ -499,6 +549,8 @@
   window.addEmployee = addEmployee;
   window.addSystem = addSystem;
   window.deleteItem = deleteItem;
+  window.exportToCSV = exportToCSV;
+  window.toggleDropdown = toggleDropdown;
 </script>
 
 </body>
