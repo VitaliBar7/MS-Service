@@ -3,244 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="main.css">
   <title>Issue Tracker</title>
-  <style>
-    /* --- כללי --- */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-      text-align: center;
-    }
-    .container {
-      max-width: 500px;
-      margin: 50px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    input, select, button, textarea {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:hover {
-      background-color: #0056b3;
-      transform: scale(1.05);
-    }
-    .loading {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #666;
-      display: none;
-    }
-
-    /* --- כרטיסי טיקט --- */
-    .issue-card {
-      background: #fff;
-      padding: 15px;
-      margin-top: 10px;
-      border-radius: 8px;
-      box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: 0.3s ease-in-out;
-    }
-    .issue-card:hover {
-      transform: scale(1.02);
-    }
-    .status {
-      font-weight: bold;
-      padding: 5px 10px;
-      border-radius: 5px;
-      min-width: 90px;
-      text-align: center;
-    }
-    .pending { background-color: #ffcc00; color: #333; }
-    .resolved { background-color: #28a745; color: white; }
-    .in-progress {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #007bff;
-      color: white;
-      padding: 5px;
-      border-radius: 50px;
-    }
-    .loader {
-      width: 16px;
-      height: 16px;
-      border: 3px solid white;
-      border-top: 3px solid transparent;
-      border-radius: 50%;
-      margin-left: 8px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* --- Sidebar לעריכת טיקט (ימני) --- */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -350px;
-      width: 300px;
-      height: 100%;
-      background: white;
-      box-shadow: -4px 0px 10px rgba(0,0,0,0.2);
-      padding: 20px;
-      transition: right 0.4s ease-in-out;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .sidebar.show {
-      right: 0;
-    }
-    .close-btn {
-      background: #dc3545;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      align-self: flex-end;
-    }
-    .save-btn {
-      background: #28a745;
-      margin-top: 10px;
-    }
-    .delete-btn {
-      background: #c82333;
-      margin-top: 5px;
-    }
-
-    /* --- Ticket Notes בתוך Sidebar --- */
-    .ticket-notes {
-      margin-top: 20px;
-      text-align: left;
-    }
-    .ticket-notes h3 {
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-    .ticket-notes textarea {
-      resize: vertical;
-      height: 60px;
-    }
-    .ticket-note-btn {
-      background-color: #007bff;
-      margin-top: 5px;
-    }
-    .ticket-note {
-      background: #f9f9f9;
-      padding: 8px;
-      margin-top: 8px;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .ticket-note button {
-      margin-left: 5px;
-      padding: 4px 8px;
-      font-size: 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .ticket-note .edit-btn {
-      background-color: #28a745;
-      color: white;
-    }
-    .ticket-note .delete-btn {
-      background-color: #dc3545;
-      color: white;
-    }
-
-    /* --- Sidebar להערות כלליות (שמאלי) --- */
-    .notes-sidebar {
-      position: fixed;
-      top: 0;
-      left: -300px;
-      width: 250px;
-      height: 100%;
-      background: #fff;
-      box-shadow: 4px 0px 10px rgba(0,0,0,0.2);
-      padding: 20px;
-      transition: left 0.4s ease-in-out;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-    .notes-sidebar.show {
-      left: 0;
-    }
-    .notes-sidebar h2 {
-      margin-top: 0;
-      font-size: 20px;
-    }
-    .note-input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    .note-btn {
-      background-color: #007bff;
-      color: white;
-      padding: 8px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .note {
-      background: #f9f9f9;
-      padding: 8px;
-      margin-top: 10px;
-      border-radius: 4px;
-      text-align: left;
-      font-size: 14px;
-    }
-    .note button {
-      margin-left: 5px;
-      padding: 4px 8px;
-      font-size: 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .note .edit-btn {
-      background-color: #28a745;
-      color: white;
-    }
-    .note .delete-btn {
-      background-color: #dc3545;
-      color: white;
-    }
-  </style>
 </head>
 <body>
 
@@ -253,7 +17,14 @@
     <option value="in progress">🔄 In Progress</option>
     <option value="closed">✅ Resolved</option>
   </select>
+  <!-- שדה בחירת עובד בעת הוספת טיקט -->
+  <select id="employee">
+    <option value="Pasha">Pasha</option>
+    <option value="Leonid">Leonid</option>
+  </select>
   <button onclick="addIssue()">➕ Add Issue</button>
+  <!-- שדה חיפוש -->
+  <input type="text" id="search" placeholder="Search issues..." />
   <!-- כפתור לפתיחת חלונית הערות כלליות -->
   <button onclick="toggleNotes()">📝 Open Notes</button>
   <div class="loading" id="loading">⏳ Loading issues...</div>
@@ -269,6 +40,11 @@
     <option value="pending">🟡 Pending</option>
     <option value="in progress">🔄 In Progress</option>
     <option value="closed">✅ Resolved</option>
+  </select>
+  <!-- שדה בחירת עובד בעריכת טיקט -->
+  <select id="edit-employee">
+    <option value="Pasha">Pasha</option>
+    <option value="Leonid">Leonid</option>
   </select>
   <button class="save-btn" onclick="saveChanges()">💾 Save Changes</button>
   <button class="delete-btn" onclick="deleteIssue()">❌ Delete Issue</button>
@@ -291,12 +67,16 @@
   <div id="notes-list"></div>
 </div>
 
+<!-- Toast Notification -->
+<div id="toast"></div>
+
 <!-- Audio element for notification sound -->
 <audio id="notification-sound" src="alert-109578.mp3" preload="auto"></audio>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+  // Storage imports omitted (images not used currently)
 
   const firebaseConfig = {
     apiKey: "AIzaSyBNAeLlnS2RoUHcmIALf4B5GviuZ-moOl0",
@@ -307,7 +87,6 @@
     appId: "1:721052867041:web:bb9a81b7ace02204945aa0",
     measurementId: "G-5M7ZFHXT0M"
   };
-
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const issuesCollection = collection(db, "issues");
@@ -315,6 +94,17 @@
   let selectedIssueId = null;
   let previousTicketCount = 0;
   const notificationSound = document.getElementById("notification-sound");
+  let allIssuesArray = [];
+
+  // פונקציה להצגת Toast
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.opacity = "1";
+    setTimeout(() => {
+      toast.style.opacity = "0";
+    }, 3000);
+  }
 
   // פונקציות לטיפול בטיקטים
   async function addIssue() {
@@ -324,62 +114,101 @@
       return;
     }
     const status = document.getElementById("status").value;
-    const date = new Date().toLocaleString();
+    const employee = document.getElementById("employee").value;
+    const date = new Date().toISOString();
     let completionTime = "";
     if (status === "closed") {
-      completionTime = new Date().toLocaleString();
+      completionTime = new Date().toISOString();
     }
-    await addDoc(issuesCollection, { description, status, date, completionTime });
+    await addDoc(issuesCollection, { description, status, employee, date, completionTime });
     document.getElementById("description").value = "";
-    loadIssues(true); // true => indicate new ticket was added
+    loadIssues(true);
   }
 
   async function loadIssues(newTicketAdded = false) {
+    // שמירת מיקום הגלילה
+    const scrollPos = window.pageYOffset;
     const issueList = document.getElementById("issue-list");
     issueList.innerHTML = "";
     document.getElementById("loading").style.display = "block";
-
-    const querySnapshot = await getDocs(issuesCollection);
-    let currentCount = 0;
+    const q = query(issuesCollection, orderBy("date", "desc"));
+    const querySnapshot = await getDocs(q);
+    allIssuesArray = [];
     querySnapshot.forEach((issueDoc) => {
-      currentCount++;
-      const issue = issueDoc.data();
-      const card = document.createElement("div");
-      card.classList.add("issue-card");
-
-      let statusHTML = "";
-      if (issue.status === "in progress") {
-        statusHTML = `<div class="status in-progress">🔄 In Progress <div class="loader"></div></div>`;
-      } else if (issue.status === "pending") {
-        statusHTML = `<div class="status pending">🟡 Pending</div>`;
-      } else if (issue.status === "closed") {
-        statusHTML = `<div class="status resolved">✅ Resolved<br><small>${issue.completionTime || ""}</small></div>`;
-      }
-
-      card.innerHTML = `<div>
-                          <h3>${issue.description}</h3>
-                          <p>📅 ${issue.date}</p>
-                        </div>
-                        ${statusHTML}`;
-
-      card.onclick = () => openSidebar(issueDoc.id, issue);
-      issueList.appendChild(card);
+      let issue = issueDoc.data();
+      issue.id = issueDoc.id;
+      allIssuesArray.push(issue);
     });
-
-    document.getElementById("loading").style.display = "none";
-
-    // השמעת התראה קולית אם נוספו טיקטים חדשים (למעט הטעינה הראשונית)
-    if (previousTicketCount !== 0 && currentCount > previousTicketCount) {
-      notificationSound.play();
+    // בדיקת שדה החיפוש לפני הצגת הטיקטים
+    const searchTerm = document.getElementById("search").value.toLowerCase();
+    if (searchTerm) {
+      const filtered = allIssuesArray.filter(issue => {
+        const desc = issue.description ? issue.description.toLowerCase() : "";
+        const emp = issue.employee ? issue.employee.toLowerCase() : "";
+        return desc.includes(searchTerm) || emp.includes(searchTerm);
+      });
+      renderIssues(filtered);
+    } else {
+      renderIssues(allIssuesArray);
     }
-    previousTicketCount = currentCount;
+    document.getElementById("loading").style.display = "none";
+    if (previousTicketCount !== 0 && allIssuesArray.length > previousTicketCount) {
+      notificationSound.play();
+      showToast("New ticket added");
+    }
+    previousTicketCount = allIssuesArray.length;
+    // שחזור מיקום הגלילה
+    window.scrollTo(0, scrollPos);
   }
 
-  // פונקציות לטיפול בטיקט נבחר
+  function renderIssues(issues) {
+    const issueList = document.getElementById("issue-list");
+    issueList.innerHTML = "";
+    issues.forEach(issue => {
+      const card = document.createElement("div");
+      card.classList.add("issue-card");
+      let statusHTML = "";
+      if (issue.status === "in progress") {
+        statusHTML = `<div class="status in-progress">In Progress <div class="loader"></div></div>`;
+      } else if (issue.status === "pending") {
+        statusHTML = `<div class="status pending">Pending</div>`;
+      } else if (issue.status === "closed") {
+        statusHTML = `<div class="status resolved">✅ Resolved<br><small>${new Date(issue.completionTime).toLocaleString() || ""}</small></div>`;
+      }
+      card.innerHTML = `<div class="issue-header">
+                          <div>
+                            <h3>${issue.description}</h3>
+                            <p>📅 ${new Date(issue.date).toLocaleString()}</p>
+                            <p>👤 ${issue.employee}</p>
+                          </div>
+                          ${statusHTML}
+                        </div>`;
+      card.onclick = () => openSidebar(issue.id, issue);
+      issueList.appendChild(card);
+    });
+  }
+
+  // טיפול בטיקט נבחר
   function openSidebar(id, issue) {
     document.getElementById("sidebar").classList.add("show");
     document.getElementById("edit-description").value = issue.description;
     document.getElementById("edit-status").value = issue.status;
+    // וודא ששדה הבחירה לעריכת עובד מכיל את הערך, אם לא – הוסף אותו
+    const editEmployeeSelect = document.getElementById("edit-employee");
+    let found = false;
+    for (let i = 0; i < editEmployeeSelect.options.length; i++) {
+      if (editEmployeeSelect.options[i].value === issue.employee) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      const newOption = document.createElement("option");
+      newOption.value = issue.employee;
+      newOption.text = issue.employee;
+      editEmployeeSelect.appendChild(newOption);
+    }
+    editEmployeeSelect.value = issue.employee;
     selectedIssueId = id;
     loadTicketNotes();
   }
@@ -392,9 +221,10 @@
     if (!selectedIssueId) return;
     const newDesc = document.getElementById("edit-description").value;
     const newStatus = document.getElementById("edit-status").value;
-    const updates = { description: newDesc, status: newStatus };
+    const newEmployee = document.getElementById("edit-employee").value;
+    const updates = { description: newDesc, status: newStatus, employee: newEmployee };
     if (newStatus === "closed") {
-      updates.completionTime = new Date().toLocaleString();
+      updates.completionTime = new Date().toISOString();
     }
     await updateDoc(doc(db, "issues", selectedIssueId), updates);
     closeSidebar();
@@ -451,7 +281,14 @@
 
   // פונקציות לטיפול בהערות לטיקט (Ticket Notes)
   async function addTicketNote() {
-    const noteContent = document.getElementById("ticket-note-input").value.trim();
+    let ticketNoteInput = document.getElementById("ticket-note-input");
+    if (!ticketNoteInput) {
+      ticketNoteInput = document.createElement("textarea");
+      ticketNoteInput.id = "ticket-note-input";
+      ticketNoteInput.placeholder = "Add a note for this ticket";
+      document.getElementById("sidebar").appendChild(ticketNoteInput);
+    }
+    const noteContent = ticketNoteInput.value.trim();
     if (!noteContent) {
       alert("⚠ Please enter a note for this ticket.");
       return;
@@ -459,7 +296,7 @@
     const date = new Date().toLocaleString();
     const ticketNotesCollection = collection(db, "issues", selectedIssueId, "ticketNotes");
     await addDoc(ticketNotesCollection, { note: noteContent, date });
-    document.getElementById("ticket-note-input").value = "";
+    ticketNoteInput.value = "";
     loadTicketNotes();
   }
 
@@ -512,6 +349,17 @@
   document.addEventListener("DOMContentLoaded", () => {
     loadIssues();
     loadNotes();
+  });
+
+  // מאזין לחיפוש – מסנן את allIssuesArray לפי תיאור או עובד
+  document.getElementById("search").addEventListener("input", function() {
+    const searchTerm = this.value.toLowerCase();
+    const filtered = allIssuesArray.filter(issue => {
+      const desc = issue.description ? issue.description.toLowerCase() : "";
+      const emp = issue.employee ? issue.employee.toLowerCase() : "";
+      return desc.includes(searchTerm) || emp.includes(searchTerm);
+    });
+    renderIssues(filtered);
   });
 
   // חשיפת פונקציות גלובליות
