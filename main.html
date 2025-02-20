@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Issue Tracker</title>
   <style>
-    /* --- עיצוב כללי --- */
+    /* --- כללי --- */
     body {
       font-family: Arial, sans-serif;
       background-color: #f4f4f9;
       margin: 0;
       padding: 0;
       overflow-x: hidden;
+      text-align: center;
     }
     .container {
       max-width: 500px;
@@ -20,23 +21,12 @@
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-      text-align: center;
     }
     h1 {
       font-size: 24px;
       margin-bottom: 20px;
     }
-
-    input{
-      width: 95%;
-      padding: 12px;
-      margin-top: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-
-    select, button, textarea {
+    input, select, button, textarea {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -56,13 +46,12 @@
       transform: scale(1.05);
     }
     .loading {
-      text-align: center;
       margin-top: 20px;
       font-size: 16px;
       color: #666;
       display: none;
     }
-    
+
     /* --- כרטיסי טיקט --- */
     .issue-card {
       background: #fff;
@@ -110,7 +99,7 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    
+
     /* --- Sidebar לעריכת טיקט (ימני) --- */
     .sidebar {
       position: fixed;
@@ -146,8 +135,8 @@
       background: #c82333;
       margin-top: 5px;
     }
-    
-    /* --- Ticket Notes בתוך Sidebar (ימני) --- */
+
+    /* --- Ticket Notes בתוך Sidebar --- */
     .ticket-notes {
       margin-top: 20px;
       text-align: left;
@@ -187,7 +176,7 @@
       background-color: #dc3545;
       color: white;
     }
-    
+
     /* --- Sidebar להערות כלליות (שמאלי) --- */
     .notes-sidebar {
       position: fixed;
@@ -302,6 +291,9 @@
   <div id="notes-list"></div>
 </div>
 
+<!-- Audio element for notification sound -->
+<audio id="notification-sound" src="alert-109578.mp3" preload="auto"></audio>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
@@ -321,6 +313,8 @@
   const issuesCollection = collection(db, "issues");
   const notesCollection = collection(db, "notes");
   let selectedIssueId = null;
+  let previousTicketCount = 0;
+  const notificationSound = document.getElementById("notification-sound");
 
   // פונקציות לטיפול בטיקטים
   async function addIssue() {
@@ -337,16 +331,18 @@
     }
     await addDoc(issuesCollection, { description, status, date, completionTime });
     document.getElementById("description").value = "";
-    loadIssues();
+    loadIssues(true); // true => indicate new ticket was added
   }
 
-  async function loadIssues() {
+  async function loadIssues(newTicketAdded = false) {
     const issueList = document.getElementById("issue-list");
     issueList.innerHTML = "";
     document.getElementById("loading").style.display = "block";
 
     const querySnapshot = await getDocs(issuesCollection);
+    let currentCount = 0;
     querySnapshot.forEach((issueDoc) => {
+      currentCount++;
       const issue = issueDoc.data();
       const card = document.createElement("div");
       card.classList.add("issue-card");
@@ -371,14 +367,20 @@
     });
 
     document.getElementById("loading").style.display = "none";
+
+    // השמעת התראה קולית אם נוספו טיקטים חדשים (למעט הטעינה הראשונית)
+    if (previousTicketCount !== 0 && currentCount > previousTicketCount) {
+      notificationSound.play();
+    }
+    previousTicketCount = currentCount;
   }
 
+  // פונקציות לטיפול בטיקט נבחר
   function openSidebar(id, issue) {
     document.getElementById("sidebar").classList.add("show");
     document.getElementById("edit-description").value = issue.description;
     document.getElementById("edit-status").value = issue.status;
     selectedIssueId = id;
-    // טען הערות לטיקט הנבחר
     loadTicketNotes();
   }
 
@@ -499,6 +501,12 @@
       notesSidebar.classList.add("show");
     }
   }
+
+  // רענון אוטומטי כל 10 שניות (לשמירת עדכניות)
+  setInterval(() => {
+    loadIssues();
+    loadNotes();
+  }, 10000);
 
   // טעינה בעת טעינת העמוד
   document.addEventListener("DOMContentLoaded", () => {
