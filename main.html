@@ -8,30 +8,87 @@
 </head>
 <body>
 
-<!-- Main Issue Tracker Container -->
 <div class="container">
   <h1>🔧 Issue Tracker</h1>
+  
+  <!-- שדות קלט לטיקט חדש -->
   <input type="text" id="description" placeholder="Issue description">
   <select id="status">
     <option value="pending">🟡 Pending</option>
     <option value="in progress">🔄 In Progress</option>
     <option value="closed">✅ Resolved</option>
   </select>
-  <!-- שדה בחירת עובד בעת הוספת טיקט -->
-  <select id="employee">
-    <option value="Pasha">Pasha</option>
-    <option value="Leonid">Leonid</option>
-  </select>
+  
+  <!-- Employees Checkboxes -->
+  <div id="employees-container" class="checkboxes-container">
+    <strong>Employees:</strong>
+    <label>
+      <input type="checkbox" name="employee" value="Pasha"> Pasha
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="employee" value="Leonid"> Leonid
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+  </div>
+  <div>
+    <input type="text" id="new-employee" placeholder="New employee name" />
+    <button onclick="addEmployee()">Add Employee</button>
+  </div>
+  
+  <!-- Systems Checkboxes -->
+  <div id="systems-container" class="checkboxes-container">
+    <strong>Systems:</strong>
+    <label>
+      <input type="checkbox" name="system" value="AGV"> AGV
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Mohoblocks"> Mohoblocks
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Lifts"> Lifts
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Shuttles"> Shuttles
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Washing machine"> Washing machine
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Conveyors"> Conveyors
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Sequence"> Sequence
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+    <label>
+      <input type="checkbox" name="system" value="Sequence lifts"> Sequence lifts
+      <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>
+    </label>
+  </div>
+  <div>
+    <input type="text" id="new-system" placeholder="New system name" />
+    <button onclick="addSystem()">Add System</button>
+  </div>
+  
   <button onclick="addIssue()">➕ Add Issue</button>
+  
   <!-- שדה חיפוש -->
   <input type="text" id="search" placeholder="Search issues..." />
-  <!-- כפתור לפתיחת חלונית הערות כלליות -->
+  
   <button onclick="toggleNotes()">📝 Open Notes</button>
+  
   <div class="loading" id="loading">⏳ Loading issues...</div>
   <div id="issue-list"></div>
 </div>
 
-<!-- Sidebar for editing an issue (right side) -->
+<!-- Sidebar לעריכת טיקט -->
 <div class="sidebar" id="sidebar">
   <button class="close-btn" onclick="closeSidebar()">✖ Close</button>
   <h2>Edit Issue</h2>
@@ -41,15 +98,10 @@
     <option value="in progress">🔄 In Progress</option>
     <option value="closed">✅ Resolved</option>
   </select>
-  <!-- שדה בחירת עובד בעריכת טיקט -->
-  <select id="edit-employee">
-    <option value="Pasha">Pasha</option>
-    <option value="Leonid">Leonid</option>
-  </select>
+  <!-- אפשר להרחיב כאן לעריכת עובדים/מערכות במידת הצורך -->
   <button class="save-btn" onclick="saveChanges()">💾 Save Changes</button>
   <button class="delete-btn" onclick="deleteIssue()">❌ Delete Issue</button>
   
-  <!-- Ticket-specific Notes Section -->
   <div class="ticket-notes">
     <h3>Ticket Notes</h3>
     <textarea id="ticket-note-input" placeholder="Add a note for this ticket"></textarea>
@@ -58,7 +110,7 @@
   </div>
 </div>
 
-<!-- Sidebar for general notes (left side) -->
+<!-- Sidebar להערות כלליות -->
 <div class="notes-sidebar" id="notes-sidebar">
   <button class="close-btn" onclick="toggleNotes()">✖ Close Notes</button>
   <h2>General Notes</h2>
@@ -76,8 +128,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
   import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-  // Storage imports omitted (images not used currently)
-
+  
   const firebaseConfig = {
     apiKey: "AIzaSyBNAeLlnS2RoUHcmIALf4B5GviuZ-moOl0",
     authDomain: "msdata-service.firebaseapp.com",
@@ -87,26 +138,26 @@
     appId: "1:721052867041:web:bb9a81b7ace02204945aa0",
     measurementId: "G-5M7ZFHXT0M"
   };
+
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const issuesCollection = collection(db, "issues");
   const notesCollection = collection(db, "notes");
+
   let selectedIssueId = null;
   let previousTicketCount = 0;
-  const notificationSound = document.getElementById("notification-sound");
   let allIssuesArray = [];
+  const notificationSound = document.getElementById("notification-sound");
 
-  // פונקציה להצגת Toast
+  // Toast Notification
   function showToast(message) {
     const toast = document.getElementById("toast");
     toast.textContent = message;
     toast.style.opacity = "1";
-    setTimeout(() => {
-      toast.style.opacity = "0";
-    }, 3000);
+    setTimeout(() => { toast.style.opacity = "0"; }, 3000);
   }
 
-  // פונקציות לטיפול בטיקטים
+  // הוספת טיקט חדש
   async function addIssue() {
     const description = document.getElementById("description").value.trim();
     if (!description) {
@@ -114,23 +165,40 @@
       return;
     }
     const status = document.getElementById("status").value;
-    const employee = document.getElementById("employee").value;
+    
+    const employeesChecked = document.querySelectorAll('input[name="employee"]:checked');
+    const employees = Array.from(employeesChecked).map(cb => cb.value);
+    
+    const systemsChecked = document.querySelectorAll('input[name="system"]:checked');
+    const systems = Array.from(systemsChecked).map(cb => cb.value);
+
     const date = new Date().toISOString();
     let completionTime = "";
     if (status === "closed") {
       completionTime = new Date().toISOString();
     }
-    await addDoc(issuesCollection, { description, status, employee, date, completionTime });
+
+    await addDoc(issuesCollection, {
+      description,
+      status,
+      employees,
+      systems,
+      date,
+      completionTime
+    });
+
     document.getElementById("description").value = "";
+    employeesChecked.forEach(cb => cb.checked = false);
+    systemsChecked.forEach(cb => cb.checked = false);
     loadIssues(true);
   }
 
+  // טעינת טיקטים
   async function loadIssues(newTicketAdded = false) {
-    // שמירת מיקום הגלילה
     const scrollPos = window.pageYOffset;
-    const issueList = document.getElementById("issue-list");
-    issueList.innerHTML = "";
+    document.getElementById("issue-list").innerHTML = "";
     document.getElementById("loading").style.display = "block";
+
     const q = query(issuesCollection, orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
     allIssuesArray = [];
@@ -139,13 +207,13 @@
       issue.id = issueDoc.id;
       allIssuesArray.push(issue);
     });
-    // בדיקת שדה החיפוש לפני הצגת הטיקטים
+
     const searchTerm = document.getElementById("search").value.toLowerCase();
     if (searchTerm) {
       const filtered = allIssuesArray.filter(issue => {
         const desc = issue.description ? issue.description.toLowerCase() : "";
-        const emp = issue.employee ? issue.employee.toLowerCase() : "";
-        return desc.includes(searchTerm) || emp.includes(searchTerm);
+        const emps = (issue.employees || []).join(" ").toLowerCase();
+        return desc.includes(searchTerm) || emps.includes(searchTerm);
       });
       renderIssues(filtered);
     } else {
@@ -157,72 +225,73 @@
       showToast("New ticket added");
     }
     previousTicketCount = allIssuesArray.length;
-    // שחזור מיקום הגלילה
     window.scrollTo(0, scrollPos);
   }
 
+  // הצגת טיקטים
   function renderIssues(issues) {
     const issueList = document.getElementById("issue-list");
     issueList.innerHTML = "";
     issues.forEach(issue => {
       const card = document.createElement("div");
       card.classList.add("issue-card");
+
+      let systemsText = "";
+      if (issue.systems && issue.systems.length > 0) {
+        systemsText = `<p>Systems: ${issue.systems.join(", ")}</p>`;
+      }
+
+      let employeesText = "";
+      if (issue.employees && issue.employees.length > 0) {
+        employeesText = `<p>Employees: ${issue.employees.join(", ")}</p>`;
+      }
+
       let statusHTML = "";
       if (issue.status === "in progress") {
-        statusHTML = `<div class="status in-progress">In Progress <div class="loader"></div></div>`;
+        statusHTML = `<div class="status in-progress">🔄 In Progress <div class="loader"></div></div>`;
       } else if (issue.status === "pending") {
         statusHTML = `<div class="status pending">Pending</div>`;
       } else if (issue.status === "closed") {
-        statusHTML = `<div class="status resolved">✅ Resolved<br><small>${new Date(issue.completionTime).toLocaleString() || ""}</small></div>`;
+        statusHTML = `<div class="status resolved">✅ Resolved<br><small>${issue.completionTime || ""}</small></div>`;
       }
-      card.innerHTML = `<div class="issue-header">
-                          <div>
-                            <h3>${issue.description}</h3>
-                            <p>📅 ${new Date(issue.date).toLocaleString()}</p>
-                            <p>👤 ${issue.employee}</p>
-                          </div>
-                          ${statusHTML}
-                        </div>`;
+
+      card.innerHTML = `
+        <div class="issue-header">
+          <div>
+            <h3>${issue.description}</h3>
+            <p>📅 ${new Date(issue.date).toLocaleString()}</p>
+            ${employeesText}
+            ${systemsText}
+          </div>
+          ${statusHTML}
+        </div>
+      `;
       card.onclick = () => openSidebar(issue.id, issue);
       issueList.appendChild(card);
     });
   }
 
-  // טיפול בטיקט נבחר
+  // פתיחת Sidebar לעריכת טיקט
   function openSidebar(id, issue) {
     document.getElementById("sidebar").classList.add("show");
     document.getElementById("edit-description").value = issue.description;
     document.getElementById("edit-status").value = issue.status;
-    // וודא ששדה הבחירה לעריכת עובד מכיל את הערך, אם לא – הוסף אותו
-    const editEmployeeSelect = document.getElementById("edit-employee");
-    let found = false;
-    for (let i = 0; i < editEmployeeSelect.options.length; i++) {
-      if (editEmployeeSelect.options[i].value === issue.employee) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      const newOption = document.createElement("option");
-      newOption.value = issue.employee;
-      newOption.text = issue.employee;
-      editEmployeeSelect.appendChild(newOption);
-    }
-    editEmployeeSelect.value = issue.employee;
+    // לטיפול בעובדים/מערכות בעריכה – ניתן להוסיף קוד במידת הצורך
     selectedIssueId = id;
     loadTicketNotes();
   }
 
+  // סגירת Sidebar
   function closeSidebar() {
     document.getElementById("sidebar").classList.remove("show");
   }
 
+  // שמירת שינויים בטיקט
   async function saveChanges() {
     if (!selectedIssueId) return;
     const newDesc = document.getElementById("edit-description").value;
     const newStatus = document.getElementById("edit-status").value;
-    const newEmployee = document.getElementById("edit-employee").value;
-    const updates = { description: newDesc, status: newStatus, employee: newEmployee };
+    const updates = { description: newDesc, status: newStatus };
     if (newStatus === "closed") {
       updates.completionTime = new Date().toISOString();
     }
@@ -231,6 +300,7 @@
     loadIssues();
   }
 
+  // מחיקת טיקט
   async function deleteIssue() {
     if (!selectedIssueId) return;
     await deleteDoc(doc(db, "issues", selectedIssueId));
@@ -238,7 +308,7 @@
     loadIssues();
   }
 
-  // פונקציות לטיפול בהערות כלליות (Notes Sidebar)
+  // הוספת הערה כללית
   async function addNote() {
     const noteContent = document.getElementById("note-content").value.trim();
     if (!noteContent) {
@@ -251,6 +321,7 @@
     loadNotes();
   }
 
+  // טעינת הערות כלליות
   async function loadNotes() {
     const notesList = document.getElementById("notes-list");
     notesList.innerHTML = "";
@@ -266,6 +337,7 @@
     });
   }
 
+  // עריכת הערה כללית
   async function editNote(noteId, currentText) {
     const newText = prompt("Edit note:", currentText);
     if (newText !== null && newText.trim() !== "" && newText.trim() !== currentText.trim()) {
@@ -274,12 +346,13 @@
     }
   }
 
+  // מחיקת הערה כללית
   async function deleteNote(noteId) {
     await deleteDoc(doc(db, "notes", noteId));
     loadNotes();
   }
 
-  // פונקציות לטיפול בהערות לטיקט (Ticket Notes)
+  // הוספת הערה לטיקט
   async function addTicketNote() {
     let ticketNoteInput = document.getElementById("ticket-note-input");
     if (!ticketNoteInput) {
@@ -300,6 +373,7 @@
     loadTicketNotes();
   }
 
+  // טעינת הערות לטיקט
   async function loadTicketNotes() {
     const notesList = document.getElementById("ticket-notes-list");
     notesList.innerHTML = "";
@@ -316,6 +390,7 @@
     });
   }
 
+  // עריכת הערה לטיקט
   async function editTicketNote(noteId, currentText) {
     const newText = prompt("Edit ticket note:", currentText);
     if (newText !== null && newText.trim() !== "" && newText.trim() !== currentText.trim()) {
@@ -324,12 +399,13 @@
     }
   }
 
+  // מחיקת הערה לטיקט
   async function deleteTicketNote(noteId) {
     await deleteDoc(doc(db, "issues", selectedIssueId, "ticketNotes", noteId));
     loadTicketNotes();
   }
 
-  // Toggle function for general notes sidebar (left side)
+  // Toggle for general notes sidebar
   function toggleNotes() {
     const notesSidebar = document.getElementById("notes-sidebar");
     if (notesSidebar.classList.contains("show")) {
@@ -339,25 +415,67 @@
     }
   }
 
-  // רענון אוטומטי כל 10 שניות (לשמירת עדכניות)
+  // פונקציה למחיקת פריט (עובד או מערכת)
+  function deleteItem(btn) {
+    btn.parentElement.remove();
+  }
+
+  // הוספת עובד חדש
+  function addEmployee() {
+    const newName = document.getElementById("new-employee").value.trim();
+    if (!newName) {
+      alert("Please enter a new employee name.");
+      return;
+    }
+    const container = document.getElementById("employees-container");
+    const existing = container.querySelector(`input[value="${newName}"]`);
+    if (existing) {
+      alert("Employee already exists.");
+      return;
+    }
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" name="employee" value="${newName}"> ${newName} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
+    container.appendChild(label);
+    document.getElementById("new-employee").value = "";
+  }
+
+  // הוספת מערכת חדשה
+  function addSystem() {
+    const newSystem = document.getElementById("new-system").value.trim();
+    if (!newSystem) {
+      alert("Please enter a new system name.");
+      return;
+    }
+    const container = document.getElementById("systems-container");
+    const existing = container.querySelector(`input[value="${newSystem}"]`);
+    if (existing) {
+      alert("System already exists.");
+      return;
+    }
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" name="system" value="${newSystem}"> ${newSystem} <button type="button" class="delete-item" onclick="deleteItem(this)">x</button>`;
+    container.appendChild(label);
+    document.getElementById("new-system").value = "";
+  }
+
+  // רענון אוטומטי כל 10 שניות
   setInterval(() => {
     loadIssues();
     loadNotes();
   }, 10000);
 
-  // טעינה בעת טעינת העמוד
   document.addEventListener("DOMContentLoaded", () => {
     loadIssues();
     loadNotes();
   });
 
-  // מאזין לחיפוש – מסנן את allIssuesArray לפי תיאור או עובד
+  // מאזין לחיפוש – מסנן את allIssuesArray
   document.getElementById("search").addEventListener("input", function() {
     const searchTerm = this.value.toLowerCase();
     const filtered = allIssuesArray.filter(issue => {
       const desc = issue.description ? issue.description.toLowerCase() : "";
-      const emp = issue.employee ? issue.employee.toLowerCase() : "";
-      return desc.includes(searchTerm) || emp.includes(searchTerm);
+      const emps = (issue.employees || []).join(" ").toLowerCase();
+      return desc.includes(searchTerm) || emps.includes(searchTerm);
     });
     renderIssues(filtered);
   });
@@ -378,6 +496,9 @@
   window.loadTicketNotes = loadTicketNotes;
   window.editTicketNote = editTicketNote;
   window.deleteTicketNote = deleteTicketNote;
+  window.addEmployee = addEmployee;
+  window.addSystem = addSystem;
+  window.deleteItem = deleteItem;
 </script>
 
 </body>
